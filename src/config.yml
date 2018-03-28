@@ -1,0 +1,20 @@
+msgformat: '&6[&c%s &6-> &c%s&6]&r '
+msgme: Я
+msgerr: '&6Ошибка: &4Игрок не найден.'
+chatradius: 100
+count: '&7Вас услышало: [{player}] человек.'
+countnull: '&7Вас никто не услышал, рядом никого нет.'
+formatlocal: '&2[L] &r{prefix}{player} &2➦&r{suffix} {message}'
+formatglobal: '&6[G] &r{prefix}{player} &6➦&r{suffix} {message}'
+formatquest: '&6[Q] &r{prefix}{player} &3➦&r{suffix} {message}'
+formatjoin: '{prefix}{player}{suffix}&r зашел на сервер.'
+formatquit: '{prefix}{player}{suffix}&r покинул нас.'
+reloadmsg: 'rpgchat перезагружен.'
+useteam: true
+msgignore: '&6Ошибка: &4Игрок вас игнорирует.'
+# default:
+#   formatlocal: '[{time}] &2[{world}] &3[{group}] &2[L] &r{prefix}{player} &2➦&r{suffix} {message}'
+#   formatglobal: '[{time}] &2[{world}] &3[{group}] &6[G] &r{prefix}{player} &6➦&r{suffix} {message}'
+# admin:
+#   formatlocal: '[{time}] &2[{world}] &3[{group}] &2[L] &r{prefix}{player} &2➦&r{suffix} {message}'
+#   formatglobal: '[{time}] &2[{world}] &3[{group}] &6[G] &r{prefix}{player} &6➦&r{suffix} {message}'

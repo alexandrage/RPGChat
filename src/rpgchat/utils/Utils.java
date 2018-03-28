@@ -1,0 +1,440 @@
+package rpgchat.utils;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+
+import net.ess3.api.IEssentials;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import rpgchat.Main;
+import rpgchat.data.User;
+import rpgchat.packet.WrapperPlayServerEntityMetadata;
+
+public class Utils {
+	private Main plugin;
+
+	public Utils(Main plugin) {
+		this.plugin = plugin;
+	}
+
+	private Map<String, User> user = new ConcurrentHashMap<String, User>();
+
+	public void setUser(Player p) {
+		user.put(p.getName().toLowerCase(), new User());
+	}
+
+	public User getUser(Player p) {
+		User us = user.get(p.getName().toLowerCase());
+		if (us == null) {
+			setUser(p);
+			us = user.get(p.getName().toLowerCase());
+		}
+		return us;
+	}
+
+	public void removeUser(Player p) {
+		user.remove(p.getName().toLowerCase());
+	}
+
+	public void removeAll() {
+		user.clear();
+	}
+
+	public boolean check(Player p, long tmp) {
+		long time = System.currentTimeMillis();
+		User us = this.plugin.u.getUser(p);
+		long last = us.getTime();
+		if ((time - last) < tmp) {
+			return true;
+		}
+		us.setTime(time);
+		return false;
+	}
+
+	public boolean e(String cmd, String... s) {
+		for (String c : s) {
+			if (cmd.equalsIgnoreCase(c)) {
+				return true;
+			}
+		}
+		for (String c : s) {
+			if (cmd.equalsIgnoreCase("/essentials:" + c.substring(1))) {
+				return true;
+			}
+		}
+		for (String c : s) {
+			if (cmd.equalsIgnoreCase("/" + this.plugin.getName().toLowerCase() + ":" + c.substring(1))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public String color(String s) {
+		return ChatColor.translateAlternateColorCodes('&', s);
+	}
+
+	public void msgsp(String message, String name) {
+		if (this.plugin.ess != null) {
+			for (Player ps : Bukkit.getOnlinePlayers()) {
+				if (ps.getName().equalsIgnoreCase(name)) {
+					continue;
+				}
+				boolean sp = false;
+				if (this.plugin.ess != null) {
+					IEssentials ess = (IEssentials) this.plugin.ess;
+					sp = ess.getUser(ps).isSocialSpyEnabled();
+				}
+				if (sp) {
+					ps.sendMessage(name + ": " + message);
+				}
+			}
+		}
+	}
+
+	public void sendJoin(Player p) {
+		if (p.hasPermission("chat.join")) {
+			String world = p.getWorld().getName();
+			String[] group = this.plugin.chat.getPlayerGroups(p);
+			String prefix = this.plugin.chat.getPlayerPrefix(p);
+			String name = "{&}" + p.getName() + "{&}";
+			String suffix = this.plugin.chat.getPlayerSuffix(p);
+			String format = this.plugin.getConfig().getString("formatjoin",
+					"{prefix}{player}{suffix}&r Зашел на сервер.");
+			format = replace(format, p, world, group[0], prefix, name, suffix);
+			BaseComponent[] bmsg = generade(format, name);
+			for (Player ps : Bukkit.getOnlinePlayers()) {
+				ps.spigot().sendMessage(bmsg);
+			}
+		}
+	}
+
+	public void sendQuit(Player p) {
+		if (p.hasPermission("chat.quit")) {
+			String world = p.getWorld().getName();
+			String[] group = this.plugin.chat.getPlayerGroups(p);
+			String prefix = this.plugin.chat.getPlayerPrefix(p);
+			String name = "{&}" + p.getName() + "{&}";
+			String suffix = this.plugin.chat.getPlayerSuffix(p);
+			String format = this.plugin.getConfig().getString("formatquit", "{prefix}{player}{suffix}&r {message}");
+			format = replace(format, p, world, group[0], prefix, name, suffix);
+			BaseComponent[] bmsg = generade(format, name);
+			for (Player ps : Bukkit.getOnlinePlayers()) {
+				ps.spigot().sendMessage(bmsg);
+			}
+		}
+	}
+
+	public String replace(String message, Player p) {
+		String format = "";
+		String world = p.getWorld().getName();
+		String[] group = this.plugin.chat.getPlayerGroups(p);
+		String prefix = this.plugin.chat.getPlayerPrefix(p);
+		String name = "{&}" + p.getName() + "{&}";
+		String suffix = this.plugin.chat.getPlayerSuffix(p);
+		int radius = this.plugin.getConfig().getInt("chatradius");
+		if (message.startsWith("!") && radius > 0 && message.length() > 1) {
+			format = replace(getFormat(group[0], "formatglobal"), p, world, group[0], prefix, name, suffix);
+		} else if (message.startsWith("?") && p.hasPermission("chat.quest") && message.length() > 1) {
+			format = replace(getFormat(group[0], "formatquest"), p, world, group[0], prefix, name, suffix);
+		} else {
+			format = replace(getFormat(group[0], "formatlocal"), p, world, group[0], prefix, name, suffix);
+		}
+		return format;
+	}
+
+	public void send(String message, Player p, String txt) {
+		int radius = this.plugin.getConfig().getInt("chatradius");
+		if (p.hasPermission("chat.color")) {
+			txt = color(txt);
+		}
+		boolean isGlobal = false;
+		boolean isMsg = false;
+		if (txt.startsWith("!") && radius > 0 && txt.length() > 1) {
+			message = replace(message, txt.substring(1));
+			isGlobal = true;
+		} else if (txt.startsWith("?") && p.hasPermission("chat.quest") && txt.length() > 1) {
+			message = replace(message, txt.substring(1));
+			isGlobal = true;
+		} else {
+			message = replace(message, txt);
+		}
+		String name = "{&}" + p.getName() + "{&}";
+		BaseComponent[] bmessages = generade(message, name, isGlobal, isMsg);
+		this.plugin.getServer().getConsoleSender().sendMessage(message.replace("{&}", ""));
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		for (Player ps : Bukkit.getOnlinePlayers()) {
+			if (this.plugin.ess != null) {
+				IEssentials ess = (IEssentials) this.plugin.ess;
+				boolean sp = ess.getUser(ps).isSocialSpyEnabled();
+				boolean ignore = ess.getUser(ps).isIgnoredPlayer(ess.getUser(p));
+				if (ignore && !p.equals(sp) && !sp) {
+					continue;
+				}
+			}
+			Location loc1 = ps.getLocation();
+			Location loc2 = p.getLocation();
+			double dis = getDistance(loc1.getX(), loc1.getZ(), loc2.getX(), loc2.getZ());
+			if (isGlobal || radius <= 0) {
+				ps.spigot().sendMessage(bmessages);
+			} else if (dis < radius || ps.hasPermission("chat.bypass")) {
+				boolean isHide = false;
+				if (this.plugin.ess != null) {
+					IEssentials ess = (IEssentials) this.plugin.ess;
+					isHide = ess.getUser(ps).isHidden();
+				}
+				if (!isHide && ps != p) {
+					sb.append(ps.getName());
+					sb.append(" ");
+					i++;
+				}
+				ps.spigot().sendMessage(bmessages);
+			}
+		}
+		if (isGlobal) {
+			return;
+		}
+		if (i == 0) {
+			String s = color(this.plugin.getConfig().getString("countnull", "Вас никто не услышал, рядом никого нет."));
+			if (s.length() > 0) {
+				p.sendMessage(s);
+			}
+			return;
+		}
+		List<String> list = s(sb.toString(), 60);
+		sb = null;
+		String players = list.toString().substring(1, list.toString().length() - 1);
+		String s = this.plugin.getConfig().getString("count", "Вас услышало: [{player}] человек.");
+		if (s.length() > 0) {
+			BaseComponent[] pref = generade(s, "{player}", i, players.replace(",", "\n"));
+			p.spigot().sendMessage(pref);
+		}
+	}
+
+	public void sendcmd(String message, Player p, Player t) {
+		if (this.plugin.ess != null) {
+			IEssentials ess = (IEssentials) this.plugin.ess;
+			boolean ignore = ess.getUser(t).isIgnoredPlayer(ess.getUser(p));
+			if (ignore) {
+				String msgignore = this.plugin.getConfig().getString("msgignore", "&6Ошибка: &4Игрок вас игнорирует.");
+				p.sendMessage(color(msgignore));
+				return;
+			}
+		}
+		if (p.hasPermission("chat.color")) {
+			message = color(message);
+		}
+		boolean isGlobal = false;
+		boolean isMsg = false;
+		String rprefix = null;
+		String rname = null;
+		String rsuffix = null;
+		if (t != null) {
+			isMsg = true;
+			rprefix = this.plugin.chat.getPlayerPrefix(t);
+			rname = "{&}" + t.getName() + "{&}";
+			rsuffix = this.plugin.chat.getPlayerSuffix(t);
+		}
+		String format = "";
+		String prefix = this.plugin.chat.getPlayerPrefix(p);
+		String name = "{&}" + p.getName() + "{&}";
+		String suffix = this.plugin.chat.getPlayerSuffix(p);
+		Date date = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+		date.setTime(System.currentTimeMillis());
+		format = color(String
+				.format(this.plugin.getConfig().getString("msgformat", "[%s -> %s] "),
+						new Object[] { this.plugin.getConfig().getString("msgme", "Я"), rprefix + rname + rsuffix })
+				.replace("{time}", df.format(date))) + message;
+		BaseComponent[] bmessages = generade(format, rname, isGlobal, isMsg);
+		p.spigot().sendMessage(bmessages);
+		format = color(String
+				.format(this.plugin.getConfig().getString("msgformat", "[%s -> %s] "),
+						new Object[] { prefix + name + suffix, this.plugin.getConfig().getString("msgme") })
+				.replace("{time}", df.format(date))) + message;
+		bmessages = generade(format, name, isGlobal, isMsg);
+		t.spigot().sendMessage(bmessages);
+	}
+
+	private BaseComponent[] generade(String message, String name, int count, String players) {
+		BaseComponent[] pref = TextComponent.fromLegacyText(color(message));
+		for (int i = 0; i < pref.length; i++) {
+			String s = pref[i].toLegacyText();
+			if (s.contains(name)) {
+				BaseComponent tmp = new TextComponent();
+				BaseComponent bs1 = TextComponent.fromLegacyText(s.substring(0, s.indexOf(name)))[0];
+				copyFormatting(pref[i], bs1);
+				tmp.addExtra(bs1);
+				BaseComponent bs2 = TextComponent.fromLegacyText(name.replace("{player}", count + ""))[0];
+				copyFormatting(pref[i], bs2);
+				BaseComponent[] hname = TextComponent.fromLegacyText(players);
+				HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hname);
+				bs2.setHoverEvent(hoverEvent);
+				tmp.addExtra(bs2);
+				BaseComponent bs3 = TextComponent.fromLegacyText(s.substring(s.indexOf(name) + name.length()))[0];
+				copyFormatting(pref[i], bs3);
+				tmp.addExtra(bs3);
+				pref[i] = tmp;
+			}
+		}
+		return pref;
+	}
+
+	private BaseComponent[] generade(String format, String name, boolean isGlobal, boolean isMsg) {
+		BaseComponent[] bmessages = TextComponent.fromLegacyText(format);
+		for (int i = 0; i < bmessages.length; i++) {
+			String s = bmessages[i].toLegacyText();
+			if (s.contains(name)) {
+				TextComponent tmp = new TextComponent();
+				BaseComponent bs1 = TextComponent.fromLegacyText(s.substring(0, s.indexOf(name)))[0];
+				copyFormatting(bmessages[i], bs1);
+				tmp.addExtra(bs1);
+				BaseComponent bs2 = TextComponent.fromLegacyText(name.replace("{&}", ""))[0];
+				copyFormatting(bmessages[i], bs2);
+				tmp.addExtra(bs2);
+				BaseComponent[] hname = TextComponent.fromLegacyText(name.replace("{&}", ""));
+				HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hname);
+				bs2.setHoverEvent(hoverEvent);
+				String cname = name.replace("{&}", "") + " ";
+				if (isGlobal) {
+					cname = "!" + cname;
+				}
+				if (isMsg) {
+					cname = "/m " + cname;
+				}
+				ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, cname);
+				bs2.setClickEvent(clickEvent);
+				BaseComponent bs3 = TextComponent.fromLegacyText(s.substring(s.indexOf(name) + name.length()))[0];
+				copyFormatting(bmessages[i], bs3);
+				tmp.addExtra(bs3);
+				bmessages[i] = tmp;
+				break;
+			}
+		}
+		return bmessages;
+	}
+
+	private BaseComponent[] generade(String format, String name) {
+		BaseComponent[] bmessages = TextComponent.fromLegacyText(format);
+		for (int i = 0; i < bmessages.length; i++) {
+			String s = bmessages[i].toLegacyText();
+			if (s.contains(name)) {
+				TextComponent tmp = new TextComponent();
+				BaseComponent bs1 = TextComponent.fromLegacyText(s.substring(0, s.indexOf(name)))[0];
+				copyFormatting(bmessages[i], bs1);
+				tmp.addExtra(bs1);
+				BaseComponent bs2 = TextComponent.fromLegacyText(name.replace("{&}", ""))[0];
+				copyFormatting(bmessages[i], bs2);
+				tmp.addExtra(bs2);
+				BaseComponent[] hname = TextComponent.fromLegacyText(name.replace("{&}", ""));
+				HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hname);
+				bs2.setHoverEvent(hoverEvent);
+				String cname = name.replace("{&}", "") + " ";
+				ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, cname);
+				bs2.setClickEvent(clickEvent);
+				BaseComponent bs3 = TextComponent.fromLegacyText(s.substring(s.indexOf(name) + name.length()))[0];
+				copyFormatting(bmessages[i], bs3);
+				tmp.addExtra(bs3);
+				bmessages[i] = tmp;
+				break;
+			}
+		}
+		return bmessages;
+	}
+
+	private String getFormat(String group, String format) {
+		String def = this.plugin.getConfig().getString(format, "{prefix}{player}{suffix} {message}");
+		return this.plugin.getConfig().getString(group + "." + format, def);
+	}
+
+	private String replace(String format, Player p, String world, String group, String prefix, String name,
+			String suffix) {
+		Date date = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+		date.setTime(System.currentTimeMillis());
+		String t = df.format(date);
+		format = color(format.replace("{time}", t).replace("{world}", world).replace("{group}", group)
+				.replace("{prefix}", prefix).replace("{player}", name).replace("{suffix}", suffix));
+		return format;
+	}
+
+	private String replace(String format, String message) {
+		format = format.replace("{message}", message);
+		return format;
+	}
+
+	private int getDistance(double x1, double y1, double x2, double y2) {
+		double dx = x2 - x1;
+		double dy = y2 - y1;
+		return (int) Math.sqrt(dx * dx + dy * dy);
+	}
+
+	public static List<String> s(String st, int spl) {
+		String[] arrWords = st.split(" ");
+		ArrayList<String> list = new ArrayList<String>();
+		StringBuilder sb = new StringBuilder();
+		int index = 0;
+		int length = arrWords.length;
+		while (index != length) {
+			if (sb.length() + arrWords[index].length() <= spl) {
+				sb.append(arrWords[index]).append(" ");
+				index++;
+			} else {
+				list.add(sb.toString());
+				sb.setLength(0);
+			}
+		}
+		if (sb.length() > 0) {
+			list.add(sb.toString());
+		}
+
+		sb = null;
+		return list;
+	}
+
+	public void addGlow(Player player, byte b) {
+		WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata();
+		packet.setEntityID(player.getEntityId());
+		WrappedDataWatcher watcher = new WrappedDataWatcher();
+		setObject(watcher, b);
+		packet.setMetadata(watcher.getWatchableObjects());
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			packet.sendPacket(p);
+		}
+	}
+
+	private void setObject(WrappedDataWatcher watcher, Object b) {
+		watcher.setObject(0, WrappedDataWatcher.Registry.get(b.getClass()), b);
+	}
+
+	private void copyFormatting(BaseComponent component, BaseComponent now) {
+		now.setColor(component.getColorRaw());
+		now.setBold(component.isBoldRaw());
+		now.setItalic(component.isItalicRaw());
+		now.setUnderlined(component.isUnderlinedRaw());
+		now.setStrikethrough(component.isStrikethroughRaw());
+		now.setObfuscated(component.isObfuscatedRaw());
+		now.setInsertion(component.getInsertion());
+		now.setClickEvent(component.getClickEvent());
+		now.setHoverEvent(component.getHoverEvent());
+		if (component.getExtra() != null) {
+			for (BaseComponent extra : component.getExtra()) {
+				now.addExtra(extra.duplicate());
+			}
+		}
+	}
+}
