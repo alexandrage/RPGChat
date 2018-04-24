@@ -31,9 +31,20 @@ public class Scheduler extends BukkitRunnable {
 		WrapperPlayServerScoreboardTeam remove = sendTeam(player, 1);
 		WrapperPlayServerScoreboardTeam created = sendTeam(player, 0);
 		for (Player p : players) {
+			if (this.plugin.getConfig().getBoolean("tabworld")) {
+				try {
+					if (player.getWorld() == p.getWorld()) {
+						player.showPlayer(this.plugin, p);
+					} else {
+						player.hidePlayer(this.plugin, p);
+					}
+				} catch (Exception e) {
+				}
+			}
 			remove.sendPacket(p);
 			created.sendPacket(p);
 		}
+
 	}
 
 	private WrapperPlayServerScoreboardTeam sendTeam(Player player, int i) {

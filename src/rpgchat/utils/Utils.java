@@ -146,7 +146,7 @@ public class Utils {
 		String name = "{&}" + p.getName() + "{&}";
 		String suffix = this.plugin.chat.getPlayerSuffix(p);
 		int radius = this.plugin.getConfig().getInt("chatradius");
-		if (message.startsWith("!") && radius > 0 && message.length() > 1) {
+		if (message.startsWith("!")  && p.hasPermission("chat.shout") && radius > 0 && message.length() > 1) {
 			format = replace(getFormat(group[0], "formatglobal"), p, world, group[0], prefix, name, suffix);
 		} else if (message.startsWith("?") && p.hasPermission("chat.quest") && message.length() > 1) {
 			format = replace(getFormat(group[0], "formatquest"), p, world, group[0], prefix, name, suffix);
@@ -163,7 +163,7 @@ public class Utils {
 		}
 		boolean isGlobal = false;
 		boolean isMsg = false;
-		if (txt.startsWith("!") && radius > 0 && txt.length() > 1) {
+		if (txt.startsWith("!") && p.hasPermission("chat.shout") && radius > 0 && txt.length() > 1) {
 			message = replace(message, txt.substring(1));
 			isGlobal = true;
 		} else if (txt.startsWith("?") && p.hasPermission("chat.quest") && txt.length() > 1) {
@@ -189,13 +189,19 @@ public class Utils {
 			Location loc1 = ps.getLocation();
 			Location loc2 = p.getLocation();
 			double dis = getDistance(loc1.getX(), loc1.getZ(), loc2.getX(), loc2.getZ());
+			if(loc1.getWorld()!=loc2.getWorld()) {
+				dis = Double.MAX_VALUE;
+			}
 			if (isGlobal || radius <= 0) {
 				ps.spigot().sendMessage(bmessages);
-			} else if (dis < radius || ps.hasPermission("chat.bypass")) {
+			} else if ((dis < radius) || ps.hasPermission("chat.bypass")) {
 				boolean isHide = false;
 				if (this.plugin.ess != null) {
 					IEssentials ess = (IEssentials) this.plugin.ess;
 					isHide = ess.getUser(ps).isHidden();
+				}
+				if(ps.hasPermission("chat.bypass") && dis > radius) {
+					isHide = true;
 				}
 				if (!isHide && ps != p) {
 					sb.append(ps.getName());

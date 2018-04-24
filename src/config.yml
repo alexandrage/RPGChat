@@ -12,6 +12,7 @@ formatquit: '{prefix}{player}{suffix}&r покинул нас.'
 reloadmsg: 'rpgchat перезагружен.'
 useteam: true
 msgignore: '&6Ошибка: &4Игрок вас игнорирует.'
+tabworld: false
 # default:
 #   formatlocal: '[{time}] &2[{world}] &3[{group}] &2[L] &r{prefix}{player} &2➦&r{suffix} {message}'
 #   formatglobal: '[{time}] &2[{world}] &3[{group}] &6[G] &r{prefix}{player} &6➦&r{suffix} {message}'
