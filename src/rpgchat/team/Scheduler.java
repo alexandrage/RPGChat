@@ -50,7 +50,7 @@ public class Scheduler extends BukkitRunnable {
 	private WrapperPlayServerScoreboardTeam sendTeam(Player player, int i) {
 		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 		BaseComponent[] c = TextComponent.fromLegacyText(trim(this.plugin.chat.getPlayerPrefix(player)));
-		team.setName(trim(c[c.length - 1].getColor() + player.getName()));
+		team.setName(trim(c[c.length - 1].getColor().toString().substring(1) + player.getName()));
 		team.setDisplayName(player.getName());
 		team.setMode(i);
 		team.setNameTagVisibility("ALWAYS");

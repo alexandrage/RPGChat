@@ -42,9 +42,11 @@ public class EventListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerJoinEvent e) {
-		this.plugin.u.setUser(e.getPlayer());
+		Player p = e.getPlayer();
+		p.setGlowing(false);
+		this.plugin.u.setUser(p);
+		this.plugin.u.sendJoin(p);
 		e.setJoinMessage(null);
-		this.plugin.u.sendJoin(e.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -83,10 +85,10 @@ public class EventListener implements Listener {
 			User us = this.plugin.u.getUser(p);
 			if (us.getGlow()) {
 				us.setGlow(false);
-				this.plugin.u.addGlow(p, (byte) 0x0);
+				p.setGlowing(false);
 			} else {
 				us.setGlow(true);
-				this.plugin.u.addGlow(p, (byte) 0x40);
+				p.setGlowing(true);
 			}
 			e.setCancelled(true);
 		}

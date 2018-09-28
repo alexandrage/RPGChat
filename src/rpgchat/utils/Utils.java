@@ -12,8 +12,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-
 import net.ess3.api.IEssentials;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -21,7 +19,6 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import rpgchat.Main;
 import rpgchat.data.User;
-import rpgchat.packet.WrapperPlayServerEntityMetadata;
 
 public class Utils {
 	private Main plugin;
@@ -146,7 +143,7 @@ public class Utils {
 		String name = "{&}" + p.getName() + "{&}";
 		String suffix = this.plugin.chat.getPlayerSuffix(p);
 		int radius = this.plugin.getConfig().getInt("chatradius");
-		if (message.startsWith("!")  && p.hasPermission("chat.shout") && radius > 0 && message.length() > 1) {
+		if (message.startsWith("!") && p.hasPermission("chat.shout") && radius > 0 && message.length() > 1) {
 			format = replace(getFormat(group[0], "formatglobal"), p, world, group[0], prefix, name, suffix);
 		} else if (message.startsWith("?") && p.hasPermission("chat.quest") && message.length() > 1) {
 			format = replace(getFormat(group[0], "formatquest"), p, world, group[0], prefix, name, suffix);
@@ -189,7 +186,7 @@ public class Utils {
 			Location loc1 = ps.getLocation();
 			Location loc2 = p.getLocation();
 			double dis = getDistance(loc1.getX(), loc1.getZ(), loc2.getX(), loc2.getZ());
-			if(loc1.getWorld()!=loc2.getWorld()) {
+			if (loc1.getWorld() != loc2.getWorld()) {
 				dis = Double.MAX_VALUE;
 			}
 			if (isGlobal || radius <= 0) {
@@ -200,7 +197,7 @@ public class Utils {
 					IEssentials ess = (IEssentials) this.plugin.ess;
 					isHide = ess.getUser(ps).isHidden();
 				}
-				if(ps.hasPermission("chat.bypass") && dis > radius) {
+				if (ps.hasPermission("chat.bypass") && dis > radius) {
 					isHide = true;
 				}
 				if (!isHide && ps != p) {
@@ -410,21 +407,6 @@ public class Utils {
 
 		sb = null;
 		return list;
-	}
-
-	public void addGlow(Player player, byte b) {
-		WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata();
-		packet.setEntityID(player.getEntityId());
-		WrappedDataWatcher watcher = new WrappedDataWatcher();
-		setObject(watcher, b);
-		packet.setMetadata(watcher.getWatchableObjects());
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			packet.sendPacket(p);
-		}
-	}
-
-	private void setObject(WrappedDataWatcher watcher, Object b) {
-		watcher.setObject(0, WrappedDataWatcher.Registry.get(b.getClass()), b);
 	}
 
 	private void copyFormatting(BaseComponent component, BaseComponent now) {
