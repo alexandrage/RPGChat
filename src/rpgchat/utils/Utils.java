@@ -6,13 +6,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Instrument;
 import org.bukkit.Location;
+import org.bukkit.Note;
 import org.bukkit.entity.Player;
-
-import net.ess3.api.IEssentials;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -21,6 +21,11 @@ import rpgchat.Main;
 import rpgchat.data.User;
 
 public class Utils {
+	private static Pattern patern;
+	static {
+		patern = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
+	}
+
 	private Main plugin;
 
 	public Utils(Main plugin) {
@@ -92,8 +97,7 @@ public class Utils {
 				}
 				boolean sp = false;
 				if (this.plugin.ess != null) {
-					IEssentials ess = (IEssentials) this.plugin.ess;
-					sp = ess.getUser(ps).isSocialSpyEnabled();
+					sp = EssUtils.isSocialSpyEnabled(this.plugin.ess, ps);
 				}
 				if (sp) {
 					ps.sendMessage(name + ": " + message);
@@ -111,7 +115,7 @@ public class Utils {
 			String suffix = this.plugin.chat.getPlayerSuffix(p);
 			String format = this.plugin.getConfig().getString("formatjoin",
 					"{prefix}{player}{suffix}&r Зашел на сервер.");
-			format = replace(format, p, world, group[0], prefix, name, suffix);
+			format = replace(format, world, group[0], prefix, name, suffix);
 			BaseComponent[] bmsg = generade(format, name);
 			for (Player ps : Bukkit.getOnlinePlayers()) {
 				ps.spigot().sendMessage(bmsg);
@@ -127,7 +131,7 @@ public class Utils {
 			String name = "{&}" + p.getName() + "{&}";
 			String suffix = this.plugin.chat.getPlayerSuffix(p);
 			String format = this.plugin.getConfig().getString("formatquit", "{prefix}{player}{suffix}&r {message}");
-			format = replace(format, p, world, group[0], prefix, name, suffix);
+			format = replace(format, world, group[0], prefix, name, suffix);
 			BaseComponent[] bmsg = generade(format, name);
 			for (Player ps : Bukkit.getOnlinePlayers()) {
 				ps.spigot().sendMessage(bmsg);
@@ -144,11 +148,11 @@ public class Utils {
 		String suffix = this.plugin.chat.getPlayerSuffix(p);
 		int radius = this.plugin.getConfig().getInt("chatradius");
 		if (message.startsWith("!") && p.hasPermission("chat.shout") && radius > 0 && message.length() > 1) {
-			format = replace(getFormat(group[0], "formatglobal"), p, world, group[0], prefix, name, suffix);
+			format = replace(getFormat(group[0], "formatglobal"), world, group[0], prefix, name, suffix);
 		} else if (message.startsWith("?") && p.hasPermission("chat.quest") && message.length() > 1) {
-			format = replace(getFormat(group[0], "formatquest"), p, world, group[0], prefix, name, suffix);
+			format = replace(getFormat(group[0], "formatquest"), world, group[0], prefix, name, suffix);
 		} else {
-			format = replace(getFormat(group[0], "formatlocal"), p, world, group[0], prefix, name, suffix);
+			format = replace(getFormat(group[0], "formatlocal"), world, group[0], prefix, name, suffix);
 		}
 		return format;
 	}
@@ -170,15 +174,31 @@ public class Utils {
 			message = replace(message, txt);
 		}
 		String name = "{&}" + p.getName() + "{&}";
-		BaseComponent[] bmessages = generade(message, name, isGlobal, isMsg);
+		// BaseComponent[] bmessages = generade(message, name, isGlobal, isMsg);
 		this.plugin.getServer().getConsoleSender().sendMessage(message.replace("{&}", ""));
 		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (Player ps : Bukkit.getOnlinePlayers()) {
+			String n = ps.getName();
+			String[] spl = message.split("\\{&\\}");
+			StringBuilder sbN = new StringBuilder();
+			boolean note = false;
+			String color = "&r";
+			for (String N : spl[2].split(" ")) {
+				if (N.equalsIgnoreCase(n)) {
+					N = N.replace(n, color("&e@" + n + color));
+					note = true;
+				} else {
+					color = repl(N);
+				}
+				sbN.append(N).append(" ");
+			}
+			String mess = spl[0] + "{&}" + spl[1] + "{&}" + sbN.toString();
+			sbN = null;
+			BaseComponent[] bmessages = generade(mess, name, isGlobal, isMsg);
 			if (this.plugin.ess != null) {
-				IEssentials ess = (IEssentials) this.plugin.ess;
-				boolean sp = ess.getUser(ps).isSocialSpyEnabled();
-				boolean ignore = ess.getUser(ps).isIgnoredPlayer(ess.getUser(p));
+				boolean sp = EssUtils.isSocialSpyEnabled(this.plugin.ess, ps);
+				boolean ignore = EssUtils.isIgnoredPlayer(this.plugin.ess, ps, p);
 				if (ignore && !p.equals(sp) && !sp) {
 					continue;
 				}
@@ -191,11 +211,13 @@ public class Utils {
 			}
 			if (isGlobal || radius <= 0) {
 				ps.spigot().sendMessage(bmessages);
+				if (note) {
+					ps.playNote(ps.getLocation(), Instrument.PIANO, Note.natural(1, Note.Tone.A));
+				}
 			} else if ((dis < radius) || ps.hasPermission("chat.bypass")) {
 				boolean isHide = false;
 				if (this.plugin.ess != null) {
-					IEssentials ess = (IEssentials) this.plugin.ess;
-					isHide = ess.getUser(ps).isHidden();
+					isHide = EssUtils.isHidden(this.plugin.ess, ps);
 				}
 				if (ps.hasPermission("chat.bypass") && dis > radius) {
 					isHide = true;
@@ -206,6 +228,9 @@ public class Utils {
 					i++;
 				}
 				ps.spigot().sendMessage(bmessages);
+				if (note) {
+					ps.playNote(ps.getLocation(), Instrument.PIANO, Note.natural(1, Note.Tone.A));
+				}
 			}
 		}
 		if (isGlobal) {
@@ -230,8 +255,7 @@ public class Utils {
 
 	public void sendcmd(String message, Player p, Player t) {
 		if (this.plugin.ess != null) {
-			IEssentials ess = (IEssentials) this.plugin.ess;
-			boolean ignore = ess.getUser(t).isIgnoredPlayer(ess.getUser(p));
+			boolean ignore = EssUtils.isIgnoredPlayer(this.plugin.ess, t, p);
 			if (ignore) {
 				String msgignore = this.plugin.getConfig().getString("msgignore", "&6Ошибка: &4Игрок вас игнорирует.");
 				p.sendMessage(color(msgignore));
@@ -364,8 +388,7 @@ public class Utils {
 		return this.plugin.getConfig().getString(group + "." + format, def);
 	}
 
-	private String replace(String format, Player p, String world, String group, String prefix, String name,
-			String suffix) {
+	private String replace(String format, String world, String group, String prefix, String name, String suffix) {
 		Date date = new Date();
 		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
 		date.setTime(System.currentTimeMillis());
@@ -424,5 +447,15 @@ public class Utils {
 				now.addExtra(extra.duplicate());
 			}
 		}
+	}
+	
+	private String repl(String string) {
+		if (string.lastIndexOf('§') != -1 && string.substring(string.lastIndexOf('§')).length() > 1) {
+			String tmp = string.substring(string.lastIndexOf('§'), string.lastIndexOf('§') + 2);
+			if (patern.matcher(tmp).matches()) {
+				return tmp;
+			}
+		}
+		return "&r";
 	}
 }

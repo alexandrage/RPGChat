@@ -7,6 +7,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import rpgchat.Main;
@@ -50,12 +52,13 @@ public class Scheduler extends BukkitRunnable {
 	private WrapperPlayServerScoreboardTeam sendTeam(Player player, int i) {
 		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 		BaseComponent[] c = TextComponent.fromLegacyText(trim(this.plugin.chat.getPlayerPrefix(player)));
+		team.setColor(ChatColor.WHITE);
 		team.setName(trim(c[c.length - 1].getColor().toString().substring(1) + player.getName()));
-		team.setDisplayName(player.getName());
+		team.setDisplayName(WrappedChatComponent.fromText(player.getName()));
 		team.setMode(i);
 		team.setNameTagVisibility("ALWAYS");
-		team.setPrefix(trim(this.plugin.chat.getPlayerPrefix(player)));
-		team.setSuffix(trim(this.plugin.chat.getPlayerSuffix(player)));
+		team.setPrefix(WrappedChatComponent.fromText(trim(this.plugin.chat.getPlayerPrefix(player))));
+		team.setSuffix(WrappedChatComponent.fromText(trim(this.plugin.chat.getPlayerSuffix(player))));
 		team.setPackOptionData(1);
 		team.getPlayers().add(player.getName());
 		return team;

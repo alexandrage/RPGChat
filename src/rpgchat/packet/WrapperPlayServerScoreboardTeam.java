@@ -24,9 +24,14 @@ import java.util.List;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.IntEnum;
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+
+import org.bukkit.ChatColor;
 
 public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
-	public static final PacketType TYPE = PacketType.Play.Server.SCOREBOARD_TEAM;
+	public static final PacketType TYPE =
+			PacketType.Play.Server.SCOREBOARD_TEAM;
 
 	public WrapperPlayServerScoreboardTeam() {
 		super(new PacketContainer(TYPE), TYPE);
@@ -70,8 +75,7 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	/**
 	 * Set Team Name.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
 	public void setName(String value) {
 		handle.getStrings().write(0, value);
@@ -84,18 +88,17 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 * 
 	 * @return The current Team Display Name
 	 */
-	public String getDisplayName() {
-		return handle.getStrings().read(1);
+	public WrappedChatComponent getDisplayName() {
+		return handle.getChatComponents().read(0);
 	}
 
 	/**
 	 * Set Team Display Name.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
-	public void setDisplayName(String value) {
-		handle.getStrings().write(1, value);
+	public void setDisplayName(WrappedChatComponent value) {
+		handle.getChatComponents().write(0, value);
 	}
 
 	/**
@@ -106,18 +109,17 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 * 
 	 * @return The current Team Prefix
 	 */
-	public String getPrefix() {
-		return handle.getStrings().read(2);
+	public WrappedChatComponent getPrefix() {
+		return handle.getChatComponents().read(1);
 	}
 
 	/**
 	 * Set Team Prefix.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
-	public void setPrefix(String value) {
-		handle.getStrings().write(2, value);
+	public void setPrefix(WrappedChatComponent value) {
+		handle.getChatComponents().write(1, value);
 	}
 
 	/**
@@ -128,18 +130,17 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 * 
 	 * @return The current Team Suffix
 	 */
-	public String getSuffix() {
-		return handle.getStrings().read(3);
+	public WrappedChatComponent getSuffix() {
+		return handle.getChatComponents().read(2);
 	}
 
 	/**
 	 * Set Team Suffix.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
-	public void setSuffix(String value) {
-		handle.getStrings().write(3, value);
+	public void setSuffix(WrappedChatComponent value) {
+		handle.getChatComponents().write(2, value);
 	}
 
 	/**
@@ -151,17 +152,16 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 * @return The current Name Tag Visibility
 	 */
 	public String getNameTagVisibility() {
-		return handle.getStrings().read(4);
+		return handle.getStrings().read(1);
 	}
 
 	/**
 	 * Set Name Tag Visibility.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
 	public void setNameTagVisibility(String value) {
-		handle.getStrings().write(4, value);
+		handle.getStrings().write(1, value);
 	}
 
 	/**
@@ -171,38 +171,34 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 * 
 	 * @return The current Color
 	 */
-	public int getColor() {
-		return handle.getIntegers().read(0);
+	public ChatColor getColor() {
+		return handle.getEnumModifier(ChatColor.class, MinecraftReflection.getMinecraftClass("EnumChatFormat")).read(0);
 	}
 
 	/**
 	 * Set Color.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
-	public void setColor(int value) {
-		handle.getIntegers().write(0, value);
+	public void setColor(ChatColor value) {
+		handle.getEnumModifier(ChatColor.class, MinecraftReflection.getMinecraftClass("EnumChatFormat")).write(0, value);
 	}
 
 	/**
-	 * Get the collision rule. Notes: only if Mode = 0 or 2. always,
-	 * pushOtherTeams, pushOwnTeam, never.
-	 * 
+	 * Get the collision rule.
+	 * Notes: only if Mode = 0 or 2. always, pushOtherTeams, pushOwnTeam, never.
 	 * @return The current collision rule
 	 */
 	public String getCollisionRule() {
-		return handle.getStrings().read(5);
+		return handle.getStrings().read(2);
 	}
 
 	/**
 	 * Sets the collision rule.
-	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
 	public void setCollisionRule(String value) {
-		handle.getStrings().write(5, value);
+		handle.getStrings().write(2, value);
 	}
 
 	/**
@@ -215,14 +211,14 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<String> getPlayers() {
-		return (List<String>) handle.getSpecificModifier(Collection.class).read(0);
+		return (List<String>) handle.getSpecificModifier(Collection.class)
+				.read(0);
 	}
 
 	/**
 	 * Set Players.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
 	public void setPlayers(List<String> value) {
 		handle.getSpecificModifier(Collection.class).write(0, value);
@@ -238,17 +234,16 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 * @return The current Mode
 	 */
 	public int getMode() {
-		return handle.getIntegers().read(1);
+		return handle.getIntegers().read(0);
 	}
 
 	/**
 	 * Set Mode.
 	 * 
-	 * @param value
-	 *            - new value.
+	 * @param value - new value.
 	 */
 	public void setMode(int value) {
-		handle.getIntegers().write(1, value);
+		handle.getIntegers().write(0, value);
 	}
 
 	/**
@@ -269,17 +264,16 @@ public class WrapperPlayServerScoreboardTeam extends AbstractPacket {
 	 * @return The current pack option data
 	 */
 	public int getPackOptionData() {
-		return handle.getIntegers().read(2);
+		return handle.getIntegers().read(1);
 	}
 
 	/**
 	 * Set pack option data.
 	 * 
-	 * @param value
-	 *            - new value
+	 * @param value - new value
 	 * @see #getPackOptionData()
 	 */
 	public void setPackOptionData(int value) {
-		handle.getIntegers().write(2, value);
+		handle.getIntegers().write(1, value);
 	}
 }
