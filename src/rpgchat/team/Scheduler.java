@@ -1,14 +1,11 @@
 package rpgchat.team;
 
 import java.util.Collection;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import rpgchat.Main;
@@ -53,7 +50,7 @@ public class Scheduler extends BukkitRunnable {
 		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 		BaseComponent[] c = TextComponent.fromLegacyText(trim(this.plugin.chat.getPlayerPrefix(player)));
 		team.setColor(ChatColor.WHITE);
-		team.setName(trim(c[c.length - 1].getColor().toString().substring(1) + player.getName()));
+		team.setName(trimt(c[c.length - 1].getColor().toString().substring(1) + player.getName()));
 		team.setDisplayName(WrappedChatComponent.fromText(player.getName()));
 		team.setMode(i);
 		team.setNameTagVisibility("ALWAYS");
@@ -66,8 +63,15 @@ public class Scheduler extends BukkitRunnable {
 
 	private String trim(String name) {
 		String color = ChatColor.translateAlternateColorCodes('&', name);
-		if (color.length() > 16)
-			return color.substring(0, 16);
+		if (color.length() > 64)
+			return color.substring(0, 64);
+		return color;
+	}
+
+	private String trimt(String name) {
+		String color = ChatColor.translateAlternateColorCodes('&', name);
+		if (color.length() > 40)
+			return color.substring(0, 40);
 		return color;
 	}
 }

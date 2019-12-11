@@ -9,6 +9,8 @@ formatglobal: '&6[G] &r{prefix}{player} &6➦&r{suffix} {message}'
 formatquest: '&6[Q] &r{prefix}{player} &3➦&r{suffix} {message}'
 formatjoin: '{prefix}{player}{suffix}&r зашел на сервер.'
 formatquit: '{prefix}{player}{suffix}&r покинул нас.'
+formatplayerlist: '{prefix}{player}'
+useformatplayerlist: true
 reloadmsg: 'rpgchat перезагружен.'
 useteam: true
 msgignore: '&6Ошибка: &4Игрок вас игнорирует.'

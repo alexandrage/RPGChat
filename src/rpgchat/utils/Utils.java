@@ -403,6 +403,12 @@ public class Utils {
 		return format;
 	}
 
+	public String replaceList(String format, Player p) {
+		String prefix = this.plugin.chat.getPlayerPrefix(p);
+		String suffix = this.plugin.chat.getPlayerSuffix(p);
+		return color(format.replace("{prefix}", prefix).replace("{player}", p.getName()).replace("{suffix}", suffix));
+	}
+
 	private int getDistance(double x1, double y1, double x2, double y2) {
 		double dx = x2 - x1;
 		double dy = y2 - y1;
@@ -448,7 +454,7 @@ public class Utils {
 			}
 		}
 	}
-	
+
 	private String repl(String string) {
 		if (string.lastIndexOf('§') != -1 && string.substring(string.lastIndexOf('§')).length() > 1) {
 			String tmp = string.substring(string.lastIndexOf('§'), string.lastIndexOf('§') + 2);

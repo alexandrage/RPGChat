@@ -6,8 +6,8 @@ import rpgchat.listener.MsgListener;
 import rpgchat.listener.ReplyListener;
 import rpgchat.packet.Packet;
 import rpgchat.team.Scheduler;
+import rpgchat.team.SchedulerP;
 import rpgchat.utils.Utils;
-
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,6 +19,7 @@ public class Main extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		Plugin lib = getServer().getPluginManager().getPlugin("ProtocolLib");
 		u = new Utils(this);
 		getCommand("msg").setExecutor(new MsgListener(this));
 		getCommand("r").setExecutor(new ReplyListener());
@@ -26,12 +27,17 @@ public class Main extends JavaPlugin {
 		saveConfig();
 		setupChat();
 		reloadConfig();
-		if (getConfig().getBoolean("useteam", true)) {
+		if (getConfig().getBoolean("useteam", true) && lib != null) {
 			new Scheduler(this).runTaskTimerAsynchronously(this, 30, 20);
+		}
+		if (getConfig().getBoolean("useformatplayerlist", true)) {
+			new SchedulerP(this).runTaskTimerAsynchronously(this, 30, 20);
 		}
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		ess = getServer().getPluginManager().getPlugin("Essentials");
-		new Packet().hack(this);
+		if (lib != null) {
+			new Packet().hack(this);
+		}
 	}
 
 	@Override
