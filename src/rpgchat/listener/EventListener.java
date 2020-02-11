@@ -3,9 +3,6 @@ package rpgchat.listener;
 import net.ess3.api.IEssentials;
 import rpgchat.Main;
 import rpgchat.data.User;
-
-import java.util.Iterator;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,9 +10,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.TabCompleteEvent;
 
 public class EventListener implements Listener {
 	private Main plugin;
@@ -25,18 +22,16 @@ public class EventListener implements Listener {
 	}
 
 	@EventHandler
-	public void on(TabCompleteEvent e) {
-		Iterator<String> it = e.getCompletions().iterator();
-		while (it.hasNext()) {
-			if (this.plugin.ess != null) {
-				String name = it.next();
-				if (Bukkit.getPlayerExact(name) != null) {
-					IEssentials ess = (IEssentials) this.plugin.ess;
-					if (ess.getUser(name).isVanished()) {
-						it.remove();
-					}
+	public void on(PlayerCommandSendEvent e) {
+		if (this.plugin.ess != null) {
+			IEssentials ess = (IEssentials) this.plugin.ess;
+			e.getCommands().removeIf(name -> {
+				Player player = Bukkit.getPlayerExact(name);
+				if (player == null) {
+					return false;
 				}
-			}
+				return ess.getUser(player.getName()).isVanished();
+			});
 		}
 	}
 
