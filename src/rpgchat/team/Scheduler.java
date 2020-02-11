@@ -70,8 +70,8 @@ public class Scheduler extends BukkitRunnable {
 
 	private String trimt(String name) {
 		String color = ChatColor.translateAlternateColorCodes('&', name);
-		if (color.length() > 40)
-			return color.substring(0, 40);
+		if (color.length() > 16)
+			return color.substring(0, 16);
 		return color;
 	}
 }
