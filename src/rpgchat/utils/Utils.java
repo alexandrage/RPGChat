@@ -404,8 +404,12 @@ public class Utils {
 	}
 
 	public String replaceList(String format, Player p) {
-		String prefix = this.plugin.chat.getPlayerPrefix(p);
-		String suffix = this.plugin.chat.getPlayerSuffix(p);
+		String prefix = "";
+		String suffix = "";
+		if (this.plugin.chat != null) {
+			prefix = this.plugin.chat.getPlayerPrefix(p);
+			suffix = this.plugin.chat.getPlayerSuffix(p);
+		}
 		return color(format.replace("{prefix}", prefix).replace("{player}", p.getName()).replace("{suffix}", suffix));
 	}
 
