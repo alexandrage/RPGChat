@@ -2,6 +2,7 @@ package rpgchat;
 
 import net.milkbowl.vault.chat.Chat;
 import rpgchat.listener.EventListener;
+import rpgchat.listener.EventSendListener;
 import rpgchat.listener.MsgListener;
 import rpgchat.listener.ReplyListener;
 import rpgchat.packet.Packet;
@@ -19,6 +20,12 @@ public class Main extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		try {
+			Class.forName("org.bukkit.event.player.PlayerCommandSendEvent");
+			getServer().getPluginManager().registerEvents(new EventSendListener(this), this);
+		} catch (ClassNotFoundException e) {
+		}
+		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		Plugin lib = getServer().getPluginManager().getPlugin("ProtocolLib");
 		u = new Utils(this);
 		getCommand("msg").setExecutor(new MsgListener(this));
@@ -33,7 +40,6 @@ public class Main extends JavaPlugin {
 		if (getConfig().getBoolean("useformatplayerlist", true)) {
 			new SchedulerP(this).runTaskTimerAsynchronously(this, 30, 20);
 		}
-		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		ess = getServer().getPluginManager().getPlugin("Essentials");
 		if (lib != null) {
 			new Packet().hack(this);

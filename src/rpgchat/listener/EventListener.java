@@ -10,7 +10,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -19,20 +18,6 @@ public class EventListener implements Listener {
 
 	public EventListener(Main instance) {
 		this.plugin = instance;
-	}
-
-	@EventHandler
-	public void on(PlayerCommandSendEvent e) {
-		if (this.plugin.ess != null) {
-			IEssentials ess = (IEssentials) this.plugin.ess;
-			e.getCommands().removeIf(name -> {
-				Player player = Bukkit.getPlayerExact(name);
-				if (player == null) {
-					return false;
-				}
-				return ess.getUser(player.getName()).isVanished();
-			});
-		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
