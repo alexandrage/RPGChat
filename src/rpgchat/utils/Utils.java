@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Instrument;
 import org.bukkit.Location;
 import org.bukkit.Note;
@@ -24,6 +23,17 @@ public class Utils {
 	private static Pattern patern;
 	static {
 		patern = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
+	}
+
+	public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
+		final char[] b = textToTranslate.toCharArray();
+		for (int i = 0; i < b.length - 1; ++i) {
+			if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
+				b[i] = '§';
+				b[i + 1] = Character.toLowerCase(b[i + 1]);
+			}
+		}
+		return new String(b);
 	}
 
 	private Main plugin;
@@ -86,7 +96,7 @@ public class Utils {
 	}
 
 	public String color(String s) {
-		return ChatColor.translateAlternateColorCodes('&', s);
+		return translateAlternateColorCodes('&', s);
 	}
 
 	public void msgsp(String message, String name) {
@@ -174,7 +184,6 @@ public class Utils {
 			message = replace(message, txt);
 		}
 		String name = "{&}" + p.getName() + "{&}";
-		// BaseComponent[] bmessages = generade(message, name, isGlobal, isMsg);
 		this.plugin.getServer().getConsoleSender().sendMessage(message.replace("{&}", ""));
 		StringBuilder sb = new StringBuilder();
 		int i = 0;

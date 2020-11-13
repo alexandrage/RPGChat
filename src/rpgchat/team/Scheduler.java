@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import rpgchat.Main;
 import rpgchat.packet.WrapperPlayServerScoreboardTeam;
+import rpgchat.utils.Utils;
 
 public class Scheduler extends BukkitRunnable {
 	private Main plugin;
@@ -67,14 +68,14 @@ public class Scheduler extends BukkitRunnable {
 	}
 
 	private String trim(String name) {
-		String color = ChatColor.translateAlternateColorCodes('&', name);
+		String color = Utils.translateAlternateColorCodes('&', name);
 		if (color.length() > 64)
 			return color.substring(0, 64);
 		return color;
 	}
 
 	private String trimt(String name) {
-		String color = ChatColor.translateAlternateColorCodes('&', name);
+		String color = Utils.translateAlternateColorCodes('&', name);
 		if (color.length() > 16)
 			return color.substring(0, 16);
 		return color;
