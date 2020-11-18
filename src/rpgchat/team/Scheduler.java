@@ -68,7 +68,7 @@ public class Scheduler extends BukkitRunnable {
 		team.setMode(i);
 		team.setNameTagVisibility("ALWAYS");
 		BaseComponent[] p = TextComponent.fromLegacyText(pref);
-		BaseComponent[] s = TextComponent.fromLegacyText(trim(this.plugin.chat.getPlayerSuffix(player)));
+		BaseComponent[] s = TextComponent.fromLegacyText(this.plugin.chat.getPlayerSuffix(player));
 		team.setPrefix(WrappedChatComponent.fromJson(ComponentSerializer.toString(p)));
 		team.setSuffix(WrappedChatComponent.fromJson(ComponentSerializer.toString(s)));
 		team.setPackOptionData(1);
@@ -78,14 +78,6 @@ public class Scheduler extends BukkitRunnable {
 
 	private String color(String name) {
 		return Utils.translateAlternateColorCodes('&', name);
-	}
-
-	private String trim(String name) {
-		String color = Utils.translateAlternateColorCodes('&', name);
-		if (color.length() > 64) {
-			return color.substring(0, 64);
-		}
-		return color;
 	}
 
 	private String trimt(String name) {
