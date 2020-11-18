@@ -40,7 +40,7 @@ public class Utils {
 				int z = 7;
 				for (int x = 0; x < 6; x++) {
 					if (paternHex.matcher(String.valueOf(b[i + x + 2])).matches()) {
-						tmp.append("0" + b[i + x + 2]);
+						tmp.append("§" + b[i + x + 2]);
 					} else {
 						tmp.setLength(0);
 						z = 0;
