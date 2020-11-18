@@ -1,5 +1,6 @@
 package rpgchat.team;
 
+import java.awt.Color;
 import java.util.Collection;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,6 +12,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import rpgchat.Main;
 import rpgchat.packet.WrapperPlayServerScoreboardTeam;
+import rpgchat.utils.ColorUtil;
 import rpgchat.utils.Utils;
 
 public class Scheduler extends BukkitRunnable {
@@ -57,7 +59,8 @@ public class Scheduler extends BukkitRunnable {
 		BaseComponent[] temp = TextComponent.fromLegacyText(pref);
 		ChatColor color = ChatColor.getByChar(temp[temp.length - 1].getColor().toString().substring(1));
 		if (color == null) {
-			color = ChatColor.WHITE;
+			Color name = Color.decode(temp[temp.length - 1].getColor().getName());
+			color = ColorUtil.fromRGB(name.getRed(), name.getGreen(), name.getBlue());
 		}
 		team.setColor(color);
 		team.setName(trimt(temp[temp.length - 1].getColor().toString().substring(1) + player.getName()));
