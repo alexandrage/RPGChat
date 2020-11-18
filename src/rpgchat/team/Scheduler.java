@@ -54,7 +54,6 @@ public class Scheduler extends BukkitRunnable {
 	private WrapperPlayServerScoreboardTeam sendTeam(Player player, int i) {
 		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 		String pref = trim(this.plugin.chat.getPlayerPrefix(player));
-		System.out.println(pref);
 		BaseComponent[] temp = TextComponent.fromLegacyText(pref);
 		ChatColor color = ChatColor.getByChar(temp[temp.length - 1].getColor().toString().substring(1));
 		if (color == null) {
