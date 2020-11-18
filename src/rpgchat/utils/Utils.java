@@ -56,7 +56,7 @@ public class Utils {
 		}
 		value = sb.toString();
 		sb.setLength(0);
-		return value;
+		return value.replace("§#", "#");
 	}
 
 	public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
