@@ -53,7 +53,7 @@ public class Scheduler extends BukkitRunnable {
 
 	private WrapperPlayServerScoreboardTeam sendTeam(Player player, int i) {
 		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
-		String pref = trim(this.plugin.chat.getPlayerPrefix(player));
+		String pref = color(this.plugin.chat.getPlayerPrefix(player));
 		BaseComponent[] temp = TextComponent.fromLegacyText(pref);
 		ChatColor color = ChatColor.getByChar(temp[temp.length - 1].getColor().toString().substring(1));
 		if (color == null) {
@@ -73,10 +73,15 @@ public class Scheduler extends BukkitRunnable {
 		return team;
 	}
 
+	private String color(String name) {
+		return Utils.translateAlternateColorCodes('&', name);
+	}
+
 	private String trim(String name) {
 		String color = Utils.translateAlternateColorCodes('&', name);
-		if (color.length() > 64)
+		if (color.length() > 64) {
 			return color.substring(0, 64);
+		}
 		return color;
 	}
 
