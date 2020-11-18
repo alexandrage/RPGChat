@@ -34,26 +34,27 @@ public class Utils {
 		StringBuilder sb = new StringBuilder();
 		char[] b = value.toCharArray();
 		for (int i = 0; i < b.length; i++) {
-			if (b[i] == '§' && i < value.length()) {
+			if (b[i] == '§' && i + 7 < value.length()) {
 				if (b[i + 1] == '#') {
 					StringBuilder tmp = new StringBuilder();
 					tmp.append("§x");
-					i += 2;
-					int z = 1;
+					int z = 8;
 					for (int x = 0; x < 6; x++) {
-						if (paternHex.matcher(String.valueOf(b[i])).matches()) {
-							tmp.append("0" + b[i]);
-							i++;
-							z++;
+						if (paternHex.matcher(String.valueOf(b[i + x + 2])).matches()) {
+							tmp.append("0" + b[i + x + 2]);
 						} else {
 							tmp.setLength(0);
-							i -= z;
+							z = 0;
 							break;
 						}
 					}
+					i += z;
 					sb.append(tmp);
 					tmp.setLength(0);
 				}
+			}
+			if (b.length == i) {
+				continue;
 			}
 			sb.append(b[i]);
 		}

@@ -8,6 +8,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
 import rpgchat.Main;
 import rpgchat.packet.WrapperPlayServerScoreboardTeam;
 import rpgchat.utils.Utils;
@@ -53,14 +54,21 @@ public class Scheduler extends BukkitRunnable {
 	private WrapperPlayServerScoreboardTeam sendTeam(Player player, int i) {
 		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 		String pref = trim(this.plugin.chat.getPlayerPrefix(player));
+		System.out.println(pref);
 		BaseComponent[] temp = TextComponent.fromLegacyText(pref);
-		team.setColor(ChatColor.getByChar(temp[temp.length - 1].getColor().toString().substring(1)));
+		ChatColor color = ChatColor.getByChar(temp[temp.length - 1].getColor().toString().substring(1));
+		if (color == null) {
+			color = ChatColor.WHITE;
+		}
+		team.setColor(color);
 		team.setName(trimt(temp[temp.length - 1].getColor().toString().substring(1) + player.getName()));
 		team.setDisplayName(WrappedChatComponent.fromText(player.getName()));
 		team.setMode(i);
 		team.setNameTagVisibility("ALWAYS");
-		team.setPrefix(WrappedChatComponent.fromText(pref));
-		team.setSuffix(WrappedChatComponent.fromText(trim(this.plugin.chat.getPlayerSuffix(player))));
+		BaseComponent[] p = TextComponent.fromLegacyText(pref);
+		BaseComponent[] s = TextComponent.fromLegacyText(trim(this.plugin.chat.getPlayerSuffix(player)));
+		team.setPrefix(WrappedChatComponent.fromJson(ComponentSerializer.toString(p)));
+		team.setSuffix(WrappedChatComponent.fromJson(ComponentSerializer.toString(s)));
 		team.setPackOptionData(1);
 		team.getPlayers().add(player.getName());
 		return team;
