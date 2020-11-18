@@ -25,15 +25,52 @@ public class Utils {
 		patern = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
 	}
 
+	private static Pattern paternHex;
+	static {
+		paternHex = Pattern.compile("[0-9a-fA-F]");
+	}
+
+	private static String colorHex(String value) {
+		StringBuilder sb = new StringBuilder();
+		char[] b = value.toCharArray();
+		for (int i = 0; i < b.length; i++) {
+			if (b[i] == '§' && i < value.length()) {
+				if (b[i + 1] == '#') {
+					StringBuilder tmp = new StringBuilder();
+					tmp.append("§x");
+					i += 2;
+					int z = 1;
+					for (int x = 0; x < 6; x++) {
+						if (paternHex.matcher(String.valueOf(b[i])).matches()) {
+							tmp.append("0" + b[i]);
+							i++;
+							z++;
+						} else {
+							tmp.setLength(0);
+							i -= z;
+							break;
+						}
+					}
+					sb.append(tmp);
+					tmp.setLength(0);
+				}
+			}
+			sb.append(b[i]);
+		}
+		value = sb.toString();
+		sb.setLength(0);
+		return value;
+	}
+
 	public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
-		final char[] b = textToTranslate.toCharArray();
+		char[] b = textToTranslate.toCharArray();
 		for (int i = 0; i < b.length - 1; ++i) {
-			if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
+			if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr#".indexOf(b[i + 1]) > -1) {
 				b[i] = '§';
 				b[i + 1] = Character.toLowerCase(b[i + 1]);
 			}
 		}
-		return new String(b);
+		return colorHex(new String(b));
 	}
 
 	private Main plugin;
@@ -198,7 +235,7 @@ public class Utils {
 					N = N.replace(n, color("&e@" + n + color));
 					note = true;
 				} else {
-					color = repl(N);
+					color = trim(N);
 				}
 				sbN.append(N).append(" ");
 			}
@@ -468,7 +505,7 @@ public class Utils {
 		}
 	}
 
-	private String repl(String string) {
+	private String trim(String string) {
 		if (string.lastIndexOf('§') != -1 && string.substring(string.lastIndexOf('§')).length() > 1) {
 			String tmp = string.substring(string.lastIndexOf('§'), string.lastIndexOf('§') + 2);
 			if (patern.matcher(tmp).matches()) {
