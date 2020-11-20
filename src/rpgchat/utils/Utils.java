@@ -1,6 +1,5 @@
 package rpgchat.utils;
 
-import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,11 +8,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Instrument;
 import org.bukkit.Location;
 import org.bukkit.Note;
 import org.bukkit.entity.Player;
+import console.ColouredConsoleSender;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -220,16 +219,12 @@ public class Utils {
 			message = replace(message, txt);
 		}
 		String name = "{&}" + p.getName() + "{&}";
-		BaseComponent[] console = TextComponent.fromLegacyText(message.replace("{&}", ""));
-		for (BaseComponent tmp : console) {
-			String cname = tmp.getColor().getName();
-			if (cname.startsWith("#")) {
-				Color c = Color.decode(tmp.getColor().getName());
-				ChatColor color = ColorUtil.fromRGB(c.getRed(), c.getGreen(), c.getBlue());
-				tmp.setColor(net.md_5.bungee.api.ChatColor.getByChar(color.getChar()));
-			}
+		if (this.plugin.isPaper) {
+			this.plugin.getServer().getConsoleSender()
+					.sendMessage(ColouredConsoleSender.convertRGBColors(message.replace("{&}", "")));
+		} else {
+			this.plugin.getServer().getConsoleSender().sendMessage(message.replace("{&}", ""));
 		}
-		this.plugin.getServer().getConsoleSender().spigot().sendMessage(console);
 		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (Player ps : Bukkit.getOnlinePlayers()) {

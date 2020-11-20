@@ -17,12 +17,18 @@ public class Main extends JavaPlugin {
 	public Chat chat = null;
 	public Plugin ess = null;
 	public Utils u;
+	public boolean isPaper;
 
 	@Override
 	public void onEnable() {
 		try {
 			Class.forName("org.bukkit.event.player.PlayerCommandSendEvent");
 			getServer().getPluginManager().registerEvents(new EventSendListener(this), this);
+		} catch (ClassNotFoundException e) {
+		}
+		try {
+			Class.forName("com.destroystokyo.paper.PaperConfig");
+			isPaper = true;
 		} catch (ClassNotFoundException e) {
 		}
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
